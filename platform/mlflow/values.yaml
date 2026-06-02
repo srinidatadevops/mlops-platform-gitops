@@ -1,0 +1,60 @@
+# MLflow server — community-charts/mlflow
+
+image:
+  repository: ghcr.io/mlflow/mlflow
+  tag: v2.18.0
+
+# Backend store: in-cluster PostgreSQL (chart-bundled sub-chart)
+backendStore:
+  databaseMigration: true
+  postgres:
+    enabled: true
+    host: mlflow-postgresql
+    port: 5432
+    database: mlflow
+    user: mlflow
+
+# Artifact storage: S3 (Pod Identity provides credentials — no keys in env vars)
+artifactRoot:
+  s3:
+    enabled: true
+    bucket: mlflow-artifacts-803031032486
+    path: ""
+
+# Service account — must match the Pod Identity Association in Terraform
+serviceAccount:
+  create: true
+  name: mlflow
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+# Bundled PostgreSQL sub-chart
+postgresql:
+  enabled: true
+  auth:
+    username: mlflow
+    password: change-this-after-testing
+    database: mlflow
+  primary:
+    persistence:
+      enabled: true
+      size: 5Gi
+      storageClass: gp3
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+
+# No built-in ingress — we'll create an ALB Ingress separately for clarity
+ingress:
+  enabled: false
+
+service:
+  type: ClusterIP
+  port: 5000
