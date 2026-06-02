@@ -18,7 +18,7 @@ spec:
           - $values/platform/kube-prometheus-stack/values.yaml
 
     # Your git repo, referenced as $values in the chart source above
-    - repoURL: https://github.com/<your-github-username>/mlops-platform-gitops.git
+    - repoURL: https://github.com/srinidatadevops/mlops-platform-gitops.git
       targetRevision: main
       ref: values
 
