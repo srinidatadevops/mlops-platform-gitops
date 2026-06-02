@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mlflow
+  namespace: mlflow
+  annotations:
+    # Provision an internet-facing ALB
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # Register Pod IPs directly with the ALB (skip kube-proxy hop)
+    alb.ingress.kubernetes.io/target-type: ip
+    # Shared ALB across all platform services — keeps cost flat
+    alb.ingress.kubernetes.io/group.name: platform
+    # HTTP only for now; we'll add HTTPS once we have a domain/cert
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    # Health check path — MLflow returns 200 at /
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mlflow
+                port:
+                  number: 5000
