@@ -1,8 +1,6 @@
-# MLflow server — community-charts/mlflow
-
-image:
-  repository: ghcr.io/mlflow/mlflow
-  tag: v2.18.0
+# MLflow server — community-charts/mlflow.
+# Image left to chart default (burakince/mlflow) — it ships psycopg2 baked in,
+# which the upstream ghcr.io/mlflow/mlflow image does not.
 
 # Backend store: bundled Bitnami PostgreSQL sub-chart wires itself in
 # when postgresql.enabled=true below. Do NOT also set backendStore.postgres.enabled
@@ -30,9 +28,21 @@ resources:
   limits:
     memory: 512Mi
 
-# Bundled PostgreSQL sub-chart
+# Bundled PostgreSQL sub-chart.
+# Override image registry to bitnamilegacy/* — Bitnami removed free images
+# from docker.io/bitnami in late 2025; the archive mirror lives at
+# docker.io/bitnamilegacy and is publicly pullable.
 postgresql:
   enabled: true
+  global:
+    security:
+      # Required to use the bitnamilegacy archive registry (not the new
+      # "Bitnami Secure Images" set). Acceptable for dev; for prod, pin to
+      # a Bitnami Premium tag, swap to CloudNativePG/Zalando, or use RDS.
+      allowInsecureImages: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
   auth:
     username: mlflow
     password: change-this-after-testing
